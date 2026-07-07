@@ -3,117 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal Portfolio</title>
-    <!-- Font Awesome Link (Icons ke liye) -->
+    <title>Simple Task Manager</title>
+    <!-- Font Awesome for clean Delete/Check Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Navbar Section -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="#" class="logo">MyPortfolio</a>
-            <ul class="nav-links" id="nav-links">
-                <li><a href="#home" class="active">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <div class="menu-toggle" id="mobile-menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
+    <div class="todo-container">
+        <h2><i class="fa-solid fa-list-check"></i> Task Manager</h2>
+        
+        <!-- Input Section -->
+        <div class="todo-input-box">
+            <input type="text" id="todo-input" placeholder="Add a new task here..." maxlength="60">
+            <button id="add-btn"><i class="fa-solid fa-plus"></i></button>
         </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h3>Hello, I am</h3>
-            <h1>MIHIR PRAJAPATI</h1>
-            <p>A passionate Developer & Designer creating clean and functional web experiences.</p>
-            <a href="#contact" class="btn">Get In Touch</a>
+        <!-- Task List Filters -->
+        <div class="filter-wrapper">
+            <span id="task-count">0 tasks remaining</span>
         </div>
-    </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="section-container">
-            <h2 class="section-title">About Me</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>Welcome to my portfolio! I specialize in building responsive, user-friendly web applications. With a strong foundation in core computer science concepts, web development, and intelligent software systems, I love turning complex problems into beautiful digital solutions.</p>
-                    <div class="skills">
-                        <h3>My Skills:</h3>
-                        <span class="skill-tag">HTML5</span>
-                        <span class="skill-tag">CSS3</span>
-                        <span class="skill-tag">JavaScript</span>
-                        <span class="skill-tag">Responsive Design</span>
-                        <span class="skill-tag">Git & GitHub</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section id="projects" class="projects">
-        <div class="section-container">
-            <h2 class="section-title">My Projects</h2>
-            <div class="project-grid">
-                <!-- Project 1 -->
-                <div class="project-card">
-                    <div class="project-info">
-                        <h3>Smart Attendance System</h3>
-                        <p>An automated attendance logging system designed to streamline tracking and reduce manual errors using modern web tech.</p>
-                        <div class="project-tags">
-                            <span>Web Tech</span>
-                            <span>Automation</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Project 2 -->
-                <div class="project-card">
-                    <div class="project-info">
-                        <h3>Fake Image & News Detector</h3>
-                        <p>An intelligent web platform that analyzes media and text content to verify authenticity and counter misinformation.</p>
-                        <div class="project-tags">
-                            <span>Analysis</span>
-                            <span>JS</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="section-container">
-            <h2 class="section-title">Contact Me</h2>
-            <div class="contact-box">
-                <form id="contact-form">
-                    <div class="form-group">
-                        <input type="text" id="name" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="email" placeholder="Your Email" required>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="message" rows="5" placeholder="Your Message" required></textarea>
-                    </div>
-                    <button type="submit" class="btn">Send Message</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 MIHIR. All Rights Reserved.</p>
-    </footer>
+        <!-- Tasks List Container -->
+        <ul id="todo-list">
+            <!-- JavaScript dynamically inserts tasks here -->
+        </ul>
+    </div>
 
     <script src="script.js"></script>
 </body>
