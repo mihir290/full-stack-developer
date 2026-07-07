@@ -1,88 +1,142 @@
-// DOM Elements Selection
-const todoInput = document.getElementById('todo-input');
-const addBtn = document.getElementById('add-btn');
-const todoList = document.getElementById('todo-list');
-const taskCount = document.getElementById('task-count');
+// Mock Product Database Objects Array
+const PRODUCTS = [
+    { id: 101, title: "Wireless Headphones", price: 2499.00, icon: "fa-headphones" },
+    { id: 102, title: "Smart Fitness Watch", price: 3999.00, icon: "fa-stopwatch" },
+    { id: 103, title: "Mechanical Keyboard", price: 4500.00, icon: "fa-keyboard" },
+    { id: 104, title: "Ergonomic Gaming Mouse", price: 1250.00, icon: "fa-mouse" },
+    { id: 105, title: "Portable Bluetooth Speaker", price: 1899.00, icon: "fa-volume-high" },
+    { id: 106, title: "USB-C Fast Charger Dock", price: 999.00, icon: "fa-bolt" }
+];
 
-// Local Storage se tasks load karein ya empty array rakhein
-let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+// App Memory State Tracking
+let cartState = [];
 
-// App initialization par saved tasks render karein
-document.addEventListener('DOMContentLoaded', renderTasks);
+// Element Selectors References
+const productsGrid = document.getElementById('products-grid-container');
+const cartSidebar = document.getElementById('cart-sidebar');
+const cartIconBtn = document.getElementById('cart-icon-btn');
+const closeCartBtn = document.getElementById('close-cart-btn');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const cartItemsContainer = document.getElementById('cart-items-container');
+const cartTotalPrice = document.getElementById('cart-total-price');
+const cartBadge = document.getElementById('cart-badge');
+const checkoutActionBtn = document.getElementById('checkout-action-btn');
 
-// Task Add karne ka logic
-function addTask() {
-    const taskTitle = todoInput.value.trim();
+// App Initialization Lifecycles
+document.addEventListener('DOMContentLoaded', () => {
+    initProductCatalog();
+    initDOMEvents();
+});
+
+// Render Catalog Grid Items Automatically 
+function initProductCatalog() {
+    productsGrid.innerHTML = PRODUCTS.map(prod => `
+        <div class="product-card">
+            <div class="product-image-box">
+                <i class="fa-solid ${prod.icon}"></i>
+            </div>
+            <h3 class="product-title">${prod.title}</h3>
+            <div class="product-price">₹${prod.price.toFixed(2)}</div>
+            <button class="add-to-cart-btn" onclick="handleAddToCart(${prod.id})">Add To Cart</button>
+        </div>
+    `).join('');
+}
+
+// Attach Open/Close Event Handlers
+function initDOMEvents() {
+    cartIconBtn.addEventListener('click', openCartDrawer);
+    closeCartBtn.addEventListener('click', closeCartDrawer);
+    sidebarOverlay.addEventListener('click', closeCartDrawer);
     
-    if (taskTitle === '') {
-        alert('Please enter a valid task!');
+    checkoutActionBtn.addEventListener('click', () => {
+        if (cartState.length === 0) {
+            alert("Your cart is empty! Add products before checking out.");
+            return;
+        }
+        alert("Thank you for your order! This application is in UI sandbox mode.");
+        cartState = [];
+        syncCartStateToUI();
+        closeCartDrawer();
+    });
+}
+
+function openCartDrawer() {
+    cartSidebar.classList.add('open');
+    sidebarOverlay.classList.add('show');
+}
+
+function closeCartDrawer() {
+    cartSidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('show');
+}
+
+// Add Item Event Flow Logic
+function handleAddToCart(productId) {
+    const targetProduct = PRODUCTS.find(p => p.id === productId);
+    const existingInCart = cartState.find(item => item.id === productId);
+
+    if (existingInCart) {
+        existingInCart.quantity += 1;
+    } else {
+        cartState.push({
+            ...targetProduct,
+            quantity: 1
+        });
+    }
+
+    syncCartStateToUI();
+    openCartDrawer(); // Interactive feedback loop
+}
+
+// Change Quantity Counter Core Logic
+function updateItemQuantity(id, step) {
+    const cartItem = cartState.find(item => item.id === id);
+    if (!cartItem) return;
+
+    cartItem.quantity += step;
+
+    // Delete item if counter value drops below 1
+    if (cartItem.quantity <= 0) {
+        removeItemFromCart(id);
         return;
     }
 
-    // New task object layout
-    const newTask = {
-        id: Date.now(), // Unique ID generation
-        title: taskTitle,
-        completed: false
-    };
-
-    tasks.push(newTask);
-    saveAndRefresh();
-    todoInput.value = ''; // Input clear karein
+    syncCartStateToUI();
 }
 
-// Event Listeners for Adding Tasks
-addBtn.addEventListener('click', addTask);
-todoInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addTask();
-});
-
-// Complete status toggle karne ka logic
-function toggleTask(id) {
-    tasks = tasks.map(task => {
-        if (task.id === id) {
-            return { ...task, completed: !task.completed };
-        }
-        return task;
-    });
-    saveAndRefresh();
+function removeItemFromCart(id) {
+    cartState = cartState.filter(item => item.id !== id);
+    syncCartStateToUI();
 }
 
-// Task Delete karne ka logic
-function deleteTask(id) {
-    tasks = tasks.filter(task => task.id !== id);
-    saveAndRefresh();
-}
+// Component State Synced Engine
+function syncCartStateToUI() {
+    // 1. Calculate Badge Count
+    const totalItemsCount = cartState.reduce((total, item) => total + item.quantity, 0);
+    cartBadge.textContent = totalItemsCount;
 
-// Local storage updates aur list dynamic creation
-function saveAndRefresh() {
-    localStorage.setItem('myTasks', JSON.stringify(tasks));
-    renderTasks();
-}
+    // 2. Calculate Final Cart Price Values
+    const overallPriceSum = cartState.reduce((total, item) => total + (item.price * item.quantity), 0);
+    cartTotalPrice.textContent = `₹${overallPriceSum.toFixed(2)}`;
 
-// UI core rendering engine
-function renderTasks() {
-    todoList.innerHTML = '';
-    
-    tasks.forEach(task => {
-        const li = document.createElement('li');
-        li.className = `todo-item ${task.completed ? 'completed' : ''}`;
-        
-        // HTML Template inside list component
-        li.innerHTML = `
-            <div class="task-content" onclick="toggleTask(${task.id})">
-                <i class="${task.completed ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'} checkbox-icon"></i>
-                <span class="task-text">${task.title}</span>
+    // 3. Render Cart Content Inside Modal
+    if (cartState.length === 0) {
+        cartItemsContainer.innerHTML = `<p class="empty-message">Your cart is currently empty.</p>`;
+        return;
+    }
+
+    cartItemsContainer.innerHTML = cartState.map(item => `
+        <div class="cart-item">
+            <div class="cart-item-details">
+                <h4>${item.title}</h4>
+                <span>₹${(item.price * item.quantity).toFixed(2)}</span>
             </div>
-            <button class="delete-btn" onclick="deleteTask(${task.id})">
-                <i class="fa-solid fa-trash-can"></i>
-            </button>
-        `;
-        
-        todoList.appendChild(li);
-    });
-
-    // Update Remaining Active Tasks Counter
-    const activeTasks = tasks.filter(t => !t.completed).length;
-    taskCount.textContent = `${activeTasks} task${activeTasks !== 1 ? 's' : ''} remaining`;
+            <div class="quantity-controls">
+                <button class="qty-btn" onclick="updateItemQuantity(${item.id}, -1)">-</button>
+                <span>${item.quantity}</span>
+                <button class="qty-btn" onclick="updateItemQuantity(${item.id}, 1)">+</button>
+            </div>
+            <i class="fa-solid fa-trash-can delete-item-btn" onclick="removeItemFromCart(${item.id})"></i>
+        </div>
+    `).join('');
 }

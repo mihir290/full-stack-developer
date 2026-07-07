@@ -3,32 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Task Manager</title>
-    <!-- Font Awesome for clean Delete/Check Icons -->
+    <title>Minimal E-Commerce Store</title>
+    <!-- Font Awesome Icons Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="todo-container">
-        <h2><i class="fa-solid fa-list-check"></i> Task Manager</h2>
+    <!-- Header / Navbar Section -->
+    <header class="navbar">
+        <div class="nav-container">
+            <h1 class="logo"><i class="fa-solid fa-bag-shopping"></i> QuickShop</h1>
+            <div class="cart-icon-wrapper" id="cart-icon-btn">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-badge" class="badge">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Storefront Section -->
+    <main class="store-container">
+        <h2 class="main-heading">Our Featured Products</h2>
+        <div class="products-grid" id="products-grid-container">
+            <!-- Products will be generated dynamically via JavaScript -->
+        </div>
+    </main>
+
+    <!-- Slide-out Shopping Cart Sidebar -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3>Your Shopping Cart</h3>
+            <i class="fa-solid fa-xmark close-cart-btn" id="close-cart-btn"></i>
+        </div>
         
-        <!-- Input Section -->
-        <div class="todo-input-box">
-            <input type="text" id="todo-input" placeholder="Add a new task here..." maxlength="60">
-            <button id="add-btn"><i class="fa-solid fa-plus"></i></button>
+        <!-- Cart Items List Container -->
+        <div class="cart-body" id="cart-items-container">
+            <!-- Dynamic Cart Row items go here -->
+            <p class="empty-message">Your cart is currently empty.</p>
         </div>
 
-        <!-- Task List Filters -->
-        <div class="filter-wrapper">
-            <span id="task-count">0 tasks remaining</span>
+        <!-- Cart Summary Footer -->
+        <div class="cart-footer">
+            <div class="total-row">
+                <span>Grand Total:</span>
+                <span id="cart-total-price">₹0.00</span>
+            </div>
+            <button class="checkout-btn" id="checkout-action-btn">Proceed to Checkout</button>
         </div>
-
-        <!-- Tasks List Container -->
-        <ul id="todo-list">
-            <!-- JavaScript dynamically inserts tasks here -->
-        </ul>
     </div>
+    
+    <!-- Transparent Background Overlay when Cart is open -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <script src="script.js"></script>
 </body>
