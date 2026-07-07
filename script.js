@@ -1,142 +1,133 @@
-// Mock Product Database Objects Array
-const PRODUCTS = [
-    { id: 101, title: "Wireless Headphones", price: 2499.00, icon: "fa-headphones" },
-    { id: 102, title: "Smart Fitness Watch", price: 3999.00, icon: "fa-stopwatch" },
-    { id: 103, title: "Mechanical Keyboard", price: 4500.00, icon: "fa-keyboard" },
-    { id: 104, title: "Ergonomic Gaming Mouse", price: 1250.00, icon: "fa-mouse" },
-    { id: 105, title: "Portable Bluetooth Speaker", price: 1899.00, icon: "fa-volume-high" },
-    { id: 106, title: "USB-C Fast Charger Dock", price: 999.00, icon: "fa-bolt" }
+// Local Storage se data retrieve karein ya initial standard fallback populate karein
+let blogPosts = JSON.parse(localStorage.getItem('myBlogPosts')) || [
+    {
+        id: 1,
+        title: "Getting Started with Web Development",
+        category: "Coding",
+        content: "Web development is an evolving landscape. By mastering HTML, CSS, and modern JavaScript architectures, you open up doors to building infinite applications scaled globally.",
+        date: "Jul 01, 2026",
+        comments: [
+            { id: 11, text: "Great introductory read! Keep it up.", timestamp: "Just Now" }
+        ]
+    }
 ];
 
-// App Memory State Tracking
-let cartState = [];
+// Document Selectors Mapping
+const blogForm = document.getElementById('blog-form');
+const blogFeed = document.getElementById('blog-feed');
 
-// Element Selectors References
-const productsGrid = document.getElementById('products-grid-container');
-const cartSidebar = document.getElementById('cart-sidebar');
-const cartIconBtn = document.getElementById('cart-icon-btn');
-const closeCartBtn = document.getElementById('close-cart-btn');
-const sidebarOverlay = document.getElementById('sidebar-overlay');
-const cartItemsContainer = document.getElementById('cart-items-container');
-const cartTotalPrice = document.getElementById('cart-total-price');
-const cartBadge = document.getElementById('cart-badge');
-const checkoutActionBtn = document.getElementById('checkout-action-btn');
+// App Initialization Event Listeners
+document.addEventListener('DOMContentLoaded', renderBlogPosts);
+blogForm.addEventListener('submit', handleAddPost);
 
-// App Initialization Lifecycles
-document.addEventListener('DOMContentLoaded', () => {
-    initProductCatalog();
-    initDOMEvents();
-});
+// Blog Create functionality logic
+function handleAddPost(e) {
+    e.preventDefault();
 
-// Render Catalog Grid Items Automatically 
-function initProductCatalog() {
-    productsGrid.innerHTML = PRODUCTS.map(prod => `
-        <div class="product-card">
-            <div class="product-image-box">
-                <i class="fa-solid ${prod.icon}"></i>
-            </div>
-            <h3 class="product-title">${prod.title}</h3>
-            <div class="product-price">₹${prod.price.toFixed(2)}</div>
-            <button class="add-to-cart-btn" onclick="handleAddToCart(${prod.id})">Add To Cart</button>
-        </div>
-    `).join('');
-}
+    const title = document.getElementById('post-title').value.trim();
+    const category = document.getElementById('post-category').value;
+    const content = document.getElementById('post-content').value.trim();
 
-// Attach Open/Close Event Handlers
-function initDOMEvents() {
-    cartIconBtn.addEventListener('click', openCartDrawer);
-    closeCartBtn.addEventListener('click', closeCartDrawer);
-    sidebarOverlay.addEventListener('click', closeCartDrawer);
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const formattedDate = new Date().toLocaleDateString('en-US', options);
+
+    const newPost = {
+        id: Date.now(), // Generate unique numeric identification ID
+        title: title,
+        category: category,
+        content: content,
+        date: formattedDate,
+        comments: [] // Initial empty comments bucket array
+    };
+
+    blogPosts.unshift(newPost); // Push to the top of list stack array
+    saveStateToLocalStorage();
+    renderBlogPosts();
     
-    checkoutActionBtn.addEventListener('click', () => {
-        if (cartState.length === 0) {
-            alert("Your cart is empty! Add products before checking out.");
-            return;
-        }
-        alert("Thank you for your order! This application is in UI sandbox mode.");
-        cartState = [];
-        syncCartStateToUI();
-        closeCartDrawer();
-    });
+    blogForm.reset(); // Clear text structures fields
 }
 
-function openCartDrawer() {
-    cartSidebar.classList.add('open');
-    sidebarOverlay.classList.add('show');
-}
+// Comments append handling engine logic
+function handleAddComment(postId) {
+    const inputField = document.getElementById(`comment-input-${postId}`);
+    const commentText = inputField.value.trim();
 
-function closeCartDrawer() {
-    cartSidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('show');
-}
+    if (commentText === '') {
+        alert('Comment content cannot be blank!');
+        return;
+    }
 
-// Add Item Event Flow Logic
-function handleAddToCart(productId) {
-    const targetProduct = PRODUCTS.find(p => p.id === productId);
-    const existingInCart = cartState.find(item => item.id === productId);
-
-    if (existingInCart) {
-        existingInCart.quantity += 1;
-    } else {
-        cartState.push({
-            ...targetProduct,
-            quantity: 1
+    const targetPost = blogPosts.find(post => post.id === postId);
+    if (targetPost) {
+        targetPost.comments.push({
+            id: Date.now(),
+            text: commentText,
+            timestamp: "Just Now"
         });
+        
+        saveStateToLocalStorage();
+        renderBlogPosts();
     }
-
-    syncCartStateToUI();
-    openCartDrawer(); // Interactive feedback loop
 }
 
-// Change Quantity Counter Core Logic
-function updateItemQuantity(id, step) {
-    const cartItem = cartState.find(item => item.id === id);
-    if (!cartItem) return;
+// Post deletion lifecycle handler mapping
+function handleDeletePost(postId) {
+    if (confirm("Are you sure you want to delete this blog post?")) {
+        blogPosts = blogPosts.filter(post => post.id !== postId);
+        saveStateToLocalStorage();
+        renderBlogPosts();
+    }
+}
 
-    cartItem.quantity += step;
+function saveStateToLocalStorage() {
+    localStorage.setItem('myBlogPosts', JSON.stringify(blogPosts));
+}
 
-    // Delete item if counter value drops below 1
-    if (cartItem.quantity <= 0) {
-        removeItemFromCart(id);
+// UI dynamic interpolation pipeline layout system render engine 
+function renderBlogPosts() {
+    if (blogPosts.length === 0) {
+        blogFeed.innerHTML = `<div class="no-posts"><i class="fa-solid fa-folder-open fa-2x"></i><p style="margin-top:10px;">No posts found. Publish your first article!</p></div>`;
         return;
     }
 
-    syncCartStateToUI();
+    blogFeed.innerHTML = blogPosts.map(post => {
+        // Render sub-comments elements map mapping template
+        const commentsHTML = post.comments.map(comm => `
+            <div class="comment-item">
+                <span class="comment-meta">${comm.timestamp}</span>
+                <p class="comment-text">${escapeHTML(comm.text)}</p>
+            </div>
+        `).join('');
+
+        return `
+            <article class="blog-card">
+                <button class="btn-delete" onclick="handleDeletePost(${post.id})">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <div class="post-meta">
+                    <span class="category-badge">${post.category}</span>
+                    <span><i class="fa-regular fa-calendar"></i> ${post.date}</span>
+                </div>
+                <h3 class="post-title-text">${escapeHTML(post.title)}</h3>
+                <p class="post-body-text">${escapeHTML(post.content)}</p>
+
+                <!-- Comments Interface Zone Module -->
+                <div class="comments-section">
+                    <h4><i class="fa-regular fa-comments"></i> Comments (${post.comments.length})</h4>
+                    <div class="comments-list">
+                        ${commentsHTML}
+                    </div>
+                    <div class="comment-form">
+                        <input type="text" id="comment-input-${post.id}" class="comment-input" placeholder="Write a public comment..." maxlength="150">
+                        <button class="btn-comment-submit" onclick="handleAddComment(${post.id})">Post</button>
+                    </div>
+                </div>
+            </article>
+        `;
+    }).join('');
 }
 
-function removeItemFromCart(id) {
-    cartState = cartState.filter(item => item.id !== id);
-    syncCartStateToUI();
-}
-
-// Component State Synced Engine
-function syncCartStateToUI() {
-    // 1. Calculate Badge Count
-    const totalItemsCount = cartState.reduce((total, item) => total + item.quantity, 0);
-    cartBadge.textContent = totalItemsCount;
-
-    // 2. Calculate Final Cart Price Values
-    const overallPriceSum = cartState.reduce((total, item) => total + (item.price * item.quantity), 0);
-    cartTotalPrice.textContent = `₹${overallPriceSum.toFixed(2)}`;
-
-    // 3. Render Cart Content Inside Modal
-    if (cartState.length === 0) {
-        cartItemsContainer.innerHTML = `<p class="empty-message">Your cart is currently empty.</p>`;
-        return;
-    }
-
-    cartItemsContainer.innerHTML = cartState.map(item => `
-        <div class="cart-item">
-            <div class="cart-item-details">
-                <h4>${item.title}</h4>
-                <span>₹${(item.price * item.quantity).toFixed(2)}</span>
-            </div>
-            <div class="quantity-controls">
-                <button class="qty-btn" onclick="updateItemQuantity(${item.id}, -1)">-</button>
-                <span>${item.quantity}</span>
-                <button class="qty-btn" onclick="updateItemQuantity(${item.id}, 1)">+</button>
-            </div>
-            <i class="fa-solid fa-trash-can delete-item-btn" onclick="removeItemFromCart(${item.id})"></i>
-        </div>
-    `).join('');
+// Helper utility parser to secure inputs scripts injections
+function escapeHTML(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
